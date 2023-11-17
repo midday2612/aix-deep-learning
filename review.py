@@ -132,3 +132,32 @@ print(X_train[:3])
 
 y_train = np.array(train_data['label'])
 y_test = np.array(test_data['label'])
+
+## 5. 빈 샘플 제거
+drop_train = [index for index, sentence in enumerate(X_train) if len(sentence) < 1]
+
+X_train = np.delete(X_train, drop_train, axis=0)
+y_train = np.delete(y_train, drop_train, axis=0)
+print(len(X_train))
+print(len(y_train))
+
+## 6. 패딩
+print('리뷰의 최대 길이 :',max(len(review) for review in X_train))
+print('리뷰의 평균 길이 :',sum(map(len, X_train))/len(X_train))
+plt.hist([len(review) for review in X_train], bins=50)
+plt.xlabel('length of samples')
+plt.ylabel('number of samples')
+plt.show()
+
+def below_threshold_len(max_len, nested_list):
+  count = 0
+  for sentence in nested_list:
+    if(len(sentence) <= max_len):
+        count = count + 1
+  print('전체 샘플 중 길이가 %s 이하인 샘플의 비율: %s'%(max_len, (count / len(nested_list))*100))
+
+max_len = 30
+below_threshold_len(max_len, X_train)
+
+X_train = pad_sequences(X_train, maxlen=max_len)
+X_test = pad_sequences(X_test, maxlen=max_len)
