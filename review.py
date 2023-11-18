@@ -10,8 +10,7 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 ##1. 데이터 로드
-urllib.request.urlretrieve("https://raw.githubusercontent.com/e9t/nsmc/master/ratings_train.txt", filename="ratings_train.txt")
-urllib.request.urlretrieve("https://raw.githubusercontent.com/e9t/nsmc/master/ratings_test.txt", filename="ratings_test.txt")
+# https://raw.githubusercontent.com/e9t/nsmc/master/ratings_test.txt에서 다운로드 받은 "ratings_train.txt", "ratings_test.txt" 파일 로드
 
 train_data = pd.read_table('ratings_train.txt')
 test_data = pd.read_table('ratings_test.txt')
@@ -34,6 +33,7 @@ train_data.drop_duplicates(subset=['document'], inplace=True)
 print('총 샘플의 수 :',len(train_data))
 
 train_data['label'].value_counts().plot(kind = 'bar')
+plt.show()
 
 print(train_data.groupby('label').size().reset_index(name = 'count'))
 print(train_data.isnull().values.any())
@@ -136,8 +136,14 @@ y_test = np.array(test_data['label'])
 ## 5. 빈 샘플 제거
 drop_train = [index for index, sentence in enumerate(X_train) if len(sentence) < 1]
 
-X_train = np.delete(X_train, drop_train, axis=0)
-y_train = np.delete(y_train, drop_train, axis=0)
+# X_train과 y_train에서 drop_train에 해당하는 인덱스를 삭제
+X_train = [X_train[i] for i in range(len(X_train)) if i not in drop_train]
+y_train = [y_train[i] for i in range(len(y_train)) if i not in drop_train]
+
+# 리스트를 다시 넘파이 배열로 변환
+#X_train = np.array(X_train)
+#y_train = np.array(y_train)
+
 print(len(X_train))
 print(len(y_train))
 
