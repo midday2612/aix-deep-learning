@@ -25,10 +25,145 @@ ________________________________________________________________________________
       여기에 작성해주세요
       
    3) ### 토큰화
-      여기에 작성해주세요
+       이제 주어진 텍스트를 더 쉽게 처리, 분석 할 수 있도록 **토큰화**를 진행한다.  우선 그 자체론 실질적인 의미가 존재하지 않아 이후 제거할 불용어를 선정한다.  
+
+      ``` python
+      stopwords = ['의','가','이','은','들','는','좀','잘','걍','과','도','를','으로','자','에','와','한','하다']
+      ```  
+      불용어 선정의 경우 한국어의 조사, 접속사와 같은 일반적인 불용어만을 선택할수도 있지만, 실제론 사용되는 데이터를 검토해 추가, 수정한다.
+      이번 프로젝트에선 위의 불용어 만을 사용했다.
+
+      이어서 불용어가 제거된 텍스트에서 각 단어들을 구분해 토큰화를 진행한다.
+      여기서 한가지 문제가 생긴다.
+      영어의 경우 불용어를 제거한 뒤, 그저 띄어쓰기를 기준으로 단어를 나누면 끝이지만  
+      >"Tokenization is an important step in natural language processing." 라는 문장의 토큰화를 진행하면,    
+      >>'tokenization', 'important', 'step', 'natural', 'language', 'processing' 와 같이 토큰화된 결과를 볼 수 있다.
+      >>>이때 불용어는 'is', 'an', 'in'이다.
+      
+      한국어의 경우 조사, 어미, 형태소 등이 단어의 의미를 형성하며, 이들은 공백으로만 나누면 제대로 된 의미 파악이 어려울 수 있다.
+      따라서 한국어 텍스트를 처리할 때에는 형태소 분석을 통해 단어의 의미 단위를 파악하고, 그 후에 토큰화를 수행하게 된다.  
+      해당 과정을 위해 한국어 텍스트의 형태소를 분석해주는 KoNLPy의 Okt를 사용했다.
+      ```python
+      okt = Okt()
+      okt.morphs('와 이런 것도 영화라고 차라리 뮤직비디오를 만드는 게 나을 뻔', stem = True)
+      ```
+      ```python
+      ['오다', '이렇다', '것', '도', '영화', '라고', '차라리', '뮤직비디오', '를', '만들다', '게', '나다', '뻔']
+      ```
+      Okt는 추가적으로 '이런', '만드는' 과 같은 변형된 형태의 단어도 원형인 '이렇다', '만들다' 변환한다.
+
+      이제 여기서 위에 선정한 불용어를 제거한면 아래의 결과를 얻을 수 있다.
+      ```python
+      ['오다', '이렇다', '것', '영화', '라고', '차라리', '뮤직비디오', '만들다', '게', '나다', '뻔']
+      ```
+      실제로 해보니 불용어로 추가해야 할 단어들이 몇몇 보이지만, 우선은 위의 내용대로 설정한 상태에서 학습 데이터를 수정해보겠다.
+
+
+      ```python
+      X_train = []
+      for sentence in tqdm(train_data['document']):
+          tokenized_sentence = okt.morphs(sentence, stem=True) # 토큰화
+          stopwords_removed_sentence = [word for word in tokenized_sentence if not word in stopwords] # 불용어 제거
+          X_train.append(stopwords_removed_sentence)
+      ```
+      훈련에 사용된 데이터셋 X_train의 한국어 텍스트들을 okt를 통해 각각의 단어들로 구분하고 불용어를 제거하여 토큰화를 진행했다.
+
+      결과 확인을 위해 3개의 샘플을 추출 해보았다.
+      ```python
+      print(X_train[:3])
+      ```
+      ```pyhton
+      [['아', '더빙', '진짜', '짜증나다', '목소리'], ['흠', '포스터', '보고', '초딩', '영화', '줄', '오버', '연기', '조차', '가볍다', '않다'], ['너', '무재', '밓었', '다그', '래서', '보다', '추천', '다']]
+      ```
+      토큰화가 제대로 진행된 것을 확인했으니, 이제 동일한 작업을 테스트를 위한 X_test에도 진행한다.
+
+      ```python
+      X_test = []
+      for sentence in tqdm(test_data['document']):
+          tokenized_sentence = okt.morphs(sentence, stem=True) # 토큰화
+          stopwords_removed_sentence = [word for word in tokenized_sentence if not word in stopwords] # 불용어 제거
+          X_test.append(stopwords_removed_sentence)
+      ```
       
    4) ### 정수 인코딩
-      여기에 작성해주세요
+      이제, 토큰화 과정을 거친 단어들을 정수 형태로 인코딩 할 차례다.  
+      기계 학습(Machine Leaning)에 사용되는 모델들은 대부분 숫자 형태의 입력을 받는다.  
+      그렇기에 텍스트 전처리를 통해 만들어진 단어들을 학습 데이터로 사용하기 위해선 꼭 거쳐야 하는 과정 중 하나라 할 수 있다.  
+      ```python
+      tokenizer = Tokenizer()
+      tokenizer.fit_on_texts(X_train)
+      ```
+      X_train 데이터에 속한 단어들로 이루어진 거대한 집합을 만들며, 각각의 단어의 하나씩 정수를 할당했다.  
+      tokenizer.word_index를 통해 확인 할 수 있다.  
+      ```python
+      print(tokenizer.word_index)
+      ```
+      ```python
+      {'영화': 1, '보다': 2, '을': 3, '없다': 4, '이다': 5, '있다': 6, '좋다': 7, ... 중략 ... '디케이드': 43751, '수간': 43752}
+      ```
+      43,000개가 넘는 단어가 있음을 확인했다.
+      빈도수가 높은 단어부터 정수를 할당하기 때문에, 낮은 정수가 할당된 단어일수록 더 자주 등장했다는 것을 알 수 있다.  
+      반대로 높은 정수의 단어는 그 빈도수가 매우 낮다는 것을 알 수 있다.  
+      등장 빈도가 너무 낮은 단어들은 상대적으로 그 영향력이 낮을테니, 원활한 학습을 위해 등장 빈도가 너무 낮은 단어들은 삭제한다.  
+      삭제할 단어들을 고르기 위해 등장 빈도가 2회 이하인 단어들의 개수와 전체 리뷰에 해당 단어들이 사용된 비율을 구했보았다.  
+      ```python
+      threshold = 3
+      total_cnt = len(tokenizer.word_index) 
+      rare_cnt = 0 
+      total_freq = 0 
+      rare_freq = 0 
+
+      for key, value in tokenizer.word_counts.items():
+          total_freq = total_freq + value
+
+          if(value < threshold):
+              rare_cnt = rare_cnt + 1
+              rare_freq = rare_freq + value
+
+      print('단어 집합(vocabulary)의 크기 :',total_cnt)
+      print('등장 빈도가 %s번 이하인 희귀 단어의 수: %s'%(threshold - 1, rare_cnt))
+      print("단어 집합에서 희귀 단어의 비율:", (rare_cnt / total_cnt)*100)
+      print("전체 등장 빈도에서 희귀 단어 등장 빈도 비율:", (rare_freq / total_freq)*100)
+      ```
+      ```python
+      단어 집합(vocabulary)의 크기 : 43752
+      등장 빈도가 2번 이하인 희귀 단어의 수: 24337
+      단어 집합에서 희귀 단어의 비율: 55.62488571950996
+      전체 등장 빈도에서 희귀 단어 등장 빈도 비율: 1.8715872104872904
+      ```
+      등장 빈도가 2회 이하인 단어들의 갯수는 전체 단어 집합의 절반을 넘지만, 실제 리뷰에 사용된 비율은 2퍼센트가 되지 않는 것으로 보아 삭제해도 괜찮다고 판단했다.
+
+
+      단어 집합의 크기를 등장 빈도가 3회 이상인 단어들의 수로 제한하고, x_train에 tokenizer를 적용하면 등장 빈도가 3회 이상인 단어들만 남는다.
+      ```python
+      vocab_size = total_cnt - rare_cnt + 1 #rare_cnt = 등장 빈도가 2회 이하인 단어들의 갯수
+      print('단어 집합의 크기 :',vocab_size) #등장 빈도가 3회 이상인 단어의 갯수로 vocab_size 수정
+      ```
+      ```python
+      단어 집합의 크기 : 19416
+      ```
+      이렇게 수정한 vacab_size를 이용해 다시 단어를 정수로 인코딩한다.
+      ```python
+      tokenizer = Tokenizer(vocab_size) 
+      tokenizer.fit_on_texts(X_train)
+      X_train = tokenizer.texts_to_sequences(X_train)
+      X_test = tokenizer.texts_to_sequences(X_test)
+      ```
+      정수 인코딩이 제대로 진행되었는지 확인하기 위해 다시 3개의 샘플을 뽑아 확인한다.
+      ```python
+      print(X_train[:3])
+      ```
+      ```python
+      [[50, 454, 16, 260, 659], [933, 457, 41, 602, 1, 214, 1449, 24, 961, 675, 19], [386, 2444, 2315, 5671, 2, 222, 9]]
+      ```
+      정수가 제대로 할당된 것을 확인 할 수 있다.
+
+      추가로 train_data와 test_data에서 label을 뽑아 y_train과 y_test를 만들었다.
+      ```python
+      y_train = np.array(train_data['label'])
+      y_test = np.array(test_data['label'])
+      ```
+
       
    5) ### 빈 샘플 제거
 
