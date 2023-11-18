@@ -35,7 +35,7 @@ ________________________________________________________________________________
       from tensorflow.keras.preprocessing.sequence import pad_sequences
       ```
 
-      **데이터 소개**
+      **데이터 소개**  
       각 파일은 id, document, label 세 개의 열로 구성된다.
       - id : 리뷰아이디(네이버에서 제공)
       - document : 실제 리뷰
