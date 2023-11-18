@@ -162,8 +162,31 @@ def below_threshold_len(max_len, nested_list):
         count = count + 1
   print('전체 샘플 중 길이가 %s 이하인 샘플의 비율: %s'%(max_len, (count / len(nested_list))*100))
 
-max_len = 30
+max_len = 35
 below_threshold_len(max_len, X_train)
 
 X_train = pad_sequences(X_train, maxlen=max_len)
 X_test = pad_sequences(X_test, maxlen=max_len)
+
+
+##전처리 데이터 저장
+# Save X_train to a text file
+with open('prep_X_train.txt', 'w', encoding='utf-8') as file:
+    for seq in X_train:
+        line = ' '.join(map(str, seq))
+        file.write(line + '\n')
+
+# Save X_test to a text file
+with open('prep_X_test.txt', 'w', encoding='utf-8') as file:
+    for seq in X_test:
+        line = ' '.join(map(str, seq))
+        file.write(line + '\n')
+
+with open('prep_y_train.txt', 'w', encoding='utf-8') as file:
+    for label in y_train:
+        file.write(str(label) + '\n')
+
+# Save y_test to a text file
+with open('prep_y_test.txt', 'w', encoding='utf-8') as file:
+    for label in y_test:
+        file.write(str(label) + '\n')
