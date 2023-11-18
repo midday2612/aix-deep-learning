@@ -280,17 +280,18 @@ ________________________________________________________________________________
       <img width="477" alt="image" src="https://github.com/midday2612/aix-deep-learning/assets/109676875/5726da5e-1d70-4c3d-a25d-a8a9cf760f79">
 
 
-      가장 긴 리뷰의 길이는 69다. 대다수의 샘플이 잘리지 않도록 적절한 max_len값을 선택해야 하는데, 아래의 코드를 실행하여 전체 샘플 중에서 길이가 max_len 이하인 샘플의 비율을 계산하여 얼마나 많        은 샘플이 해당 길이 이하로 잘리지 않을지 확인한다.
+      가장 긴 리뷰의 길이는 95이다. 대다수의 샘플이 잘리지 않도록 적절한 max_len값을 선택해야 하는데, 아래의 코드를 실행하여 전체 샘플 중에서 길이가 max_len 이하인 샘플의 비율을 계산하여 얼마나 많은 샘플이 해당 길이 이하로 잘리지 않을지 확인한다.
 
-      max_len의 값을 바꿔보며 테스트한 결과 최종적으로 max_len = 30으로 설정하였다.  
+      max_len의 값을 바꿔보며 테스트한 결과 최종적으로 max_len = 35으로 설정하였다. 전체 샘플중 길이가 max_len이하인 샘플 비율이 95에 가까운 값으로 선정했다.  
 
 
       ```python
-      max_len = 30
+      max_len = 35
       below_threshold_len(max_len, X_train)
       ```
-      이 코드를 실행 시키면 전체 샘플 중 길이가 30 이하인 샘플의 비율이 92.68444828318972임을 확인할 수 있다. 
-      <img width="447" alt="image" src="https://github.com/midday2612/aix-deep-learning/assets/109676875/ccfd190d-f2a4-43f1-bb4b-b65a0a508a07">
+      이 코드를 실행 시키면 전체 샘플 중 길이가 35 이하인 샘플의 비율이  94.71624131997999임을 확인할 수 있다. 
+      <img width="432" alt="image" src="https://github.com/midday2612/aix-deep-learning/assets/109676875/201cd2f0-ccf8-4d07-9e27-a83ba202ac75">
+
 
       ```python
       X_train = pad_sequences(X_train, maxlen=max_len)
