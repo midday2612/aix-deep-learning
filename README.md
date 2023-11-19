@@ -135,7 +135,55 @@ ________________________________________________________________________________
       plt.show()
       ```
       ![image](https://github.com/midday2612/aix-deep-learning/assets/149879074/364abe18-b476-49d7-9038-7eac5f87fa28)
-
+      약 146,000개의 영화 리뷰 샘플 중 그래프 상으로는 긍정과 부정 둘 다 약 72,000개의 샘플이 존재하는 것처럼 보인다. 또한 레이블의 분포도 균일한 것처럼 보인다. 정확하게 몇 개인지 확인한다.
+      ``` python
+     print(train_data.groupby('label').size().reset_index(name = 'count'))
+      ```
+      ``` python
+         label  count
+      0      0  73342
+      1      1  72841
+      ```
+      레이블이 0인 리뷰가 근소하게 많은 것을 확인할 수 있다. 리뷰 중 Null값을 가진 샘플이 있는지 확인한다.
+      ``` python
+     print(train_data.isnull().values.any())
+      ```
+      ``` python
+     True
+      ```
+      True 값이 나온 것으로 보아 데이터 중에 Null 값을 가진 샘플이 존재한다. 어떤 열에 존재하는지 확인한다.
+      ``` python
+     print(train_data.isnull().sum())
+      ```
+      ``` python
+     id          0
+      document    1
+      label       0
+      dtype: int64
+      ```
+      document 열에서 총 1개가 존재한다. document 열에서 Null값이 존재한다는 것을 조건으로 Null값을 가진 샘플이 어느 인덱스의 위치에 존재하는지 확인한다.
+      ``` python
+     train_data.loc[train_data.document.isnull()]
+      ```
+      |   | id | document | label |
+      | :--: | :--: | --: | --: |
+      | 25857 | 2172111 | NaN | 1 |
+      출력 결과는 다음과 같다. Null 값을 가진 샘플을 제거한다.
+      ``` python
+      train_data = train_data.dropna(how = 'any') # Null 값이 존재하는 행 제거
+      print(train_data.isnull().values.any()) # Null 값이 존재하는지 확인
+      ```
+      ``` python
+      False
+      ```
+      성공적으로 제거되었다. 다시 샘플의 개수를 출력하여 1개의 샘플이 제거되었는지 총 데이터 개수를 확인한다.
+      ``` python
+      print(len(train_data))
+      ```
+      ``` python
+      146182
+      ```
+      
       
    4) ### 토큰화
        이제 주어진 텍스트를 더 쉽게 처리, 분석 할 수 있도록 **토큰화**를 진행한다.  우선 그 자체론 실질적인 의미가 존재하지 않아 이후 제거할 불용어를 선정한다.  
