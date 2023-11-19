@@ -156,20 +156,20 @@ ________________________________________________________________________________
       레이블이 0인 리뷰가 근소하게 많은 것을 확인할 수 있다. 리뷰 중 Null값을 가진 샘플이 있는지 확인한다.  
       
       ``` python
-     print(train_data.isnull().values.any())
+      print(train_data.isnull().values.any())
       ```
       
       ``` python
-     True
+      True
       ```
       True 값이 나온 것으로 보아 데이터 중에 Null 값을 가진 샘플이 존재한다. 어떤 열에 존재하는지 확인한다.
       
       ``` python
-     print(train_data.isnull().sum())
+      print(train_data.isnull().sum())
       ```
       
       ``` python
-     id          0
+      id          0
       document    1
       label       0
       dtype: int64
@@ -177,7 +177,7 @@ ________________________________________________________________________________
       document 열에서 총 1개가 존재한다. document 열에서 Null값이 존재한다는 것을 조건으로 Null값을 가진 샘플이 어느 인덱스의 위치에 존재하는지 확인한다.
       
       ``` python
-     train_data.loc[train_data.document.isnull()]
+      train_data.loc[train_data.document.isnull()]
       ```
       
       |   | id | document | label |
