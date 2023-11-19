@@ -207,17 +207,75 @@ ________________________________________________________________________________
       이제 데이터의 전처리를 수행해본다. 위의 train_data와 test_data에서 온점(.)이나 ?와 같은 각종 특수문자가 사용된 것을 확인했다. train_data로부터 한글 외의 특수부호를 제거하기 위해서 정규 표현식을 사용한다.
       한글의 정규 표현식은 자음의 경우 'ㄱ ~ ㅎ', 모음의 경우 'ㅏ ~ ㅣ'이다.  
       해당 범위 내에 어떤 자음과 모음이 속하는지 알고 싶다면 아래의 링크를 참고한다.  
-      Click [here](https://www.unicode.org/charts/PDF/U3130.pdf)
+      Click [here](https://www.unicode.org/charts/PDF/U3130.pdf)  
       ㄱ ~ ㅎ: 3131 ~ 314E  
       ㅏ ~ ㅣ: 314F ~ 3163
       
-      완성형 한글의 범위는 '가 ~ 힣'과 같이 사용한다.  
+      완성형 한글의 범위는 '가 ~ 힣'과 같이 사용한다.
+         
       해당 범위 내에 포함된 음절은 아래의 링크에서 확인한다.  
-      Click [here](https://www.unicode.org/charts/PDF/UAC00.pdf)  
+      Click [here](https://www.unicode.org/charts/PDF/UAC00.pdf)
+        
       이를 응용해 한글에 속하지 않는 구두점이나 특수문자를 제거한다.  
       위 범위 지정을 모두 반영하여 train_data에 한글과 공백을 제외하고 모두 제거하는 정규 표현식을 수행한다.
-      
-      
+      ``` python
+      # 한글과 공백을 제외하고 모두 제거
+      train_data['document'] = train_data['document'].str.replace("[^ㄱ-ㅎㅏ-ㅣ가-힣 ]","")
+      train_data[:5]
+      ```
+      |   | id | document | label |
+      | :--: | :--: | --: | --: |
+      | 0 | 9976970 | 아 더빙 진짜 짜증나네요 목소리 | 0 |
+      | 1 | 3819312 | 흠 포스터보고 초딩영화줄 오버연기조차 가볍지 않구나 | 1 |
+      | 2 | 10265843 | 너무재밓었다그래서보는것을추천한다 | 0 |
+      | 3 | 9045019 | 교도서 이야기구면 솔직히 재미는 없다평점 조정 | 0 |
+      | 4 | 6483659 | 사이몬페그의 익살스런 연기가 돋보였던 영화스파이더맨에서 늙어보이기만 했던 커스틴 던... | 1 |
+      상위 5개의 샘플을 다시 출력했다. 정규표현식 수행 후, 기존의 띄어쓰기는 유지되면서 온점이나 구두점 등은 제거되었다.
+      네이버 영화 리뷰에서 가져온 데이터 특성 상 영어, 숫자, 특수문자로만 구성된 리뷰를 업로드할 수 있다. 정규표현식이 수행되면 기존의 리뷰는 아무것도 없는 값이 되었을 것이다. train_data에 존재하는 이와 같은 리뷰를 Null값으로 변경해 새로운 Null값이 존재하는지 확인한다.
+      ``` python
+      train_data['document'] = train_data['document'].str.replace('^ +', "") # white space 데이터를 empty value로 변경
+      train_data['document'].replace('', np.nan, inplace=True)
+      print(train_data.isnull().sum())
+      ```
+      ``` python
+      id            0
+      document    789
+      label         0
+      dtype: int64
+      ```
+      Null값이 789개 새로 생겼다, Null값이 있는 행을 5개만 출력한다.
+      ``` python
+      train_data.loc[train_data.document.isnull()][:5]
+      ```
+      |   | id | document | label |
+      | :--: | :--: | --: | --: |
+      | 404 | 4221289 | NaN | 0 |
+      | 412 | 9509970 | NaN | 1 |
+      | 470 | 10147571 | NaN | 1 |
+      | 584 | 71178896 | NaN | 0 |
+      | 593 | 6478189 | NaN | 0 |  
+      Null 샘플은 의미가 없으므로 제거한다.
+      ``` python
+      train_data = train_data.dropna(how = 'any')
+      print(len(train_data))
+      ```
+      ``` python
+      145393
+      ```
+      train_datad의 샘플 개수는 최종적으로 145,393개가 되었다.
+      train_data처럼 test_data 역히 동일한 전처리 과정을 진행한다.
+      ``` python
+      test_data.drop_duplicates(subset = ['document'], inplace=True) # document 열에서 중복인 내용이 있다면 중복 제거
+      test_data['document'] = test_data['document'].str.replace("[^ㄱ-ㅎㅏ-ㅣ가-힣 ]","") # 정규 표현식 수행
+      test_data['document'] = test_data['document'].str.replace('^ +', "") # 공백은 empty 값으로 변경
+      test_data['document'].replace('', np.nan, inplace=True) # 공백은 Null 값으로 변경
+      test_data = test_data.dropna(how='any') # Null 값 제거
+      print('전처리 후 테스트용 샘플의 개수 :',len(test_data))
+      ```
+      ``` python
+      전처리 후 테스트용 샘플의 개수 : 48852
+      ```
+      test_data의 총 개수는 최종적으로 48,852개가 되었다.
       
    5) ### 토큰화
        이제 주어진 텍스트를 더 쉽게 처리, 분석 할 수 있도록 **토큰화**를 진행한다.  우선 그 자체론 실질적인 의미가 존재하지 않아 이후 제거할 불용어를 선정한다.  
