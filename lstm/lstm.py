@@ -16,19 +16,19 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 
 # Load X_train from the text file
-X_train = np.loadtxt('prep_X_train.txt', delimiter=' ', dtype=int)
+X_train = np.loadtxt('../data_prep/prep_X_train.txt', delimiter=' ', dtype=int)
 
 # Load X_test from the text file
-X_test = np.loadtxt('prep_X_test.txt', delimiter=' ', dtype=int)
+X_test = np.loadtxt('../data_prep/prep_X_test.txt', delimiter=' ', dtype=int)
 
 # Load y_train from the text file
-y_train = np.loadtxt('prep_y_train.txt', dtype=int)
+y_train = np.loadtxt('../data_prep/prep_y_train.txt', dtype=int)
 
 # Load y_test from the text file
-y_test = np.loadtxt('prep_y_test.txt', dtype=int)
+y_test = np.loadtxt('../data_prep/prep_y_test.txt', dtype=int)
 
 # 파일에서 저장된 정보 불러오기
-with open('prep_info.txt', 'r', encoding='utf-8') as file:
+with open('../data_prep/prep_info.txt', 'r', encoding='utf-8') as file:
     loaded_info = file.readlines()
 
 # 불러온 정보 처리
@@ -39,7 +39,7 @@ stopwords_str = loaded_info[2].split(': ')[1].strip()
 # 문자열로 저장된 리스트를 eval 함수를 사용하여 리스트로 변환
 stopwords = eval(stopwords_str)
 
-with open('tokenizer.pickle', 'rb') as file:
+with open('../data_prep/tokenizer.pickle', 'rb') as file:
     tokenizer = pickle.load(file)
 
 
