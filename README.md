@@ -140,7 +140,7 @@ ________________________________________________________________________________
       train_data['label'].value_counts().plot(kind = 'bar')
       plt.show()
       ```
-      ![image](https://github.com/midday2612/aix-deep-learning/assets/149879074/364abe18-b476-49d7-9038-7eac5f87fa28)
+      ![image](https://github.com/midday2612/aix-deep-learning/assets/149879074/364abe18-b476-49d7-9038-7eac5f87fa28)  
       약 146,000개의 영화 리뷰 샘플 중 그래프 상으로는 긍정과 부정 둘 다 약 72,000개의 샘플이 존재하는 것처럼 보인다. 또한 레이블의 분포도 균일한 것처럼 보인다. 정확하게 몇 개인지 확인한다.
       
       ``` python
