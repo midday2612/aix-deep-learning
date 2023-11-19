@@ -190,3 +190,11 @@ with open('prep_y_train.txt', 'w', encoding='utf-8') as file:
 with open('prep_y_test.txt', 'w', encoding='utf-8') as file:
     for label in y_test:
         file.write(str(label) + '\n')
+
+with open('prep_info.txt', 'w', encoding='utf-8') as file:
+    file.write(f'max_len: {max_len}\n')
+    file.write(f'vocab_size: {vocab_size}\n')
+    file.write(f'stopwords: {stopwords}\n')
+
+with open('tokenizer.pickle', 'wb') as handle:
+     pickle.dump(tokenizer, handle)
