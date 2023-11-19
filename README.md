@@ -106,12 +106,36 @@ ________________________________________________________________________________
       train_data에서 중복된 형식의 데이터가 있는지 확인한다.
       ``` python
       # document 열과 label 열의 중복을 제외한 값의 개수
-train_data['document'].nunique(), train_data['label'].nunique()
-      ```  
+      train_data['document'].nunique(), train_data['label'].nunique()
+      ```
+      
       ``` python
       (146182, 2)
       ```  
-      결과에서 볼 수 있듯 총 150,000개의 샘플로 구성된 train_data에서 document 열의 중복을 제거한 샘플의 개수가 146,182
+      결과에서 볼 수 있듯 총 150,000개의 샘플로 구성된 train_data에서 document 열의 중복을 제거한 샘플의 개수가 146,182임을 알 수 있다. 이는 약 4,000개의 중복 샘플이 존재한다는 의미이다.
+      label 열은 0또는 1인 오직 두 가지의 값만 가지므로 2가 출력되는 것을 알 수 있다.
+      중복 샘플을 제거한다.
+
+      ``` python
+      # document 열의 중복 제거
+      train_data.drop_duplicates(subset=['document'], inplace=True)
+      ```
+      중복이 제거되었는지 전체 샘플 수를 확인한다.
+      ``` python
+      print('총 샘플의 수 :',len(train_data))
+      ```
+      ``` python
+      총 샘플의 수 : 146183
+      ```
+      중복 샘플이 제거되었음을 확인할 수 있다.  
+      train_data에서 label 값의 긍정, 부정 분포를 확인한다.
+      이때, 아나콘다 가상환경에서 기존 코드를 실행시키면 두 개의 그래프가 꼬여서 나오는 문제를 해결하기 위해 plt.show()코드를 추가해 두 개의 그래프를 분리한다.
+      ``` python
+      train_data['label'].value_counts().plot(kind = 'bar')
+      plt.show()
+      ```
+      ![image](https://github.com/midday2612/aix-deep-learning/assets/149879074/364abe18-b476-49d7-9038-7eac5f87fa28)
+
       
    4) ### 토큰화
        이제 주어진 텍스트를 더 쉽게 처리, 분석 할 수 있도록 **토큰화**를 진행한다.  우선 그 자체론 실질적인 의미가 존재하지 않아 이후 제거할 불용어를 선정한다.  
