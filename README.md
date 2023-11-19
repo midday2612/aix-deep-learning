@@ -146,7 +146,7 @@ ________________________________________________________________________________
       ``` python
       print(train_data.groupby('label').size().reset_index(name = 'count'))
       ```
-      
+      ㅇ아ㅚ외;ㅣ
       ``` python
          label  count
       0      0  73342
