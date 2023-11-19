@@ -264,8 +264,8 @@ ________________________________________________________________________________
       ``` python
       145393
       ```
-      train_datad의 샘플 개수는 최종적으로 145,393개가 되었다.
-      train_data처럼 test_data 역히 동일한 전처리 과정을 진행한다.
+      train_datad의 샘플 개수는 최종적으로 145,393개가 되었다.  
+      train_data처럼 test_data 역시 동일한 전처리 과정을 진행한다.
       ``` python
       test_data.drop_duplicates(subset = ['document'], inplace=True) # document 열에서 중복인 내용이 있다면 중복 제거
       test_data['document'] = test_data['document'].str.replace("[^ㄱ-ㅎㅏ-ㅣ가-힣 ]","") # 정규 표현식 수행
