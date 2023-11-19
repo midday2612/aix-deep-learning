@@ -144,7 +144,7 @@ ________________________________________________________________________________
       약 146,000개의 영화 리뷰 샘플 중 그래프 상으로는 긍정과 부정 둘 다 약 72,000개의 샘플이 존재하는 것처럼 보인다. 또한 레이블의 분포도 균일한 것처럼 보인다. 정확하게 몇 개인지 확인한다.
       
       ``` python
-     print(train_data.groupby('label').size().reset_index(name = 'count'))
+      print(train_data.groupby('label').size().reset_index(name = 'count'))
       ```
       
       ``` python
