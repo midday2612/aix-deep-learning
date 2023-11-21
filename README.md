@@ -485,8 +485,124 @@ ________________________________________________________________________________
 _________________________________________________________________________________________
 
 ## CNN을 이용한 예측 모델
+1) **데이터 전처리**  
+   앞서 '데이터 로드 및 데이터 전처리' 파트에서 로드 및 전처리한 데이터를 사용한다.
 
-_________________________________________________________________________________________
+2) **Multi-Kernel 1D CNN Model 만들기**  
+   커널 사이즈가 3X3, 4X4, 5X5인 3 종류의 커널을 각각 128개씩 사용하는 영화리뷰 감성을 판별하는 CNN 모델을 만들어보자.    
 
+    
+   먼저, 필요한 tool들을 임포트한다.
+    ```python
+    from tensorflow.keras.models import Sequential, Model
+    from tensorflow.keras.layers import Embedding, Dropout, Conv1D, GlobalMaxPooling1D, Dense, Input, Flatten, Concatenate
+    from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+    from tensorflow.keras.models import load_model
+    ```
+
+   128차원의 임베딩 벡터(하이퍼 파라미터),  
+   0.5, 0.8의 두 가지 드롭아웃 레이트,  
+   3종류의 커널을 각각 128개씩 사용한다.
+    ```python
+    embedding_dim = 128
+    dropout_ratio = (0.5, 0.8)
+    num_filters = 128
+    hidden_units = 128
+     ```
+
+   CNN모델의 입력과 임베딩 레이어
+   ```python
+   model_input = Input(shape = (max_len,))
+      z = Embedding(vocab_size, embedding_dim, input_length = max_len, name="embedding")(model_input)
+      z = Dropout(dropout_ratio[0])(z)
+   ```
+   임베딩 층 이후에 드롭아웃 비율이 0.5인 드롭아웃 레이어를 위치시켜 50퍼센트 드롭아웃을 진행했다.
+
+   이어서 3X3, 4X4, 5X5인 3 종류의 커널을 각각 128개씩 사용하는 합성곱 레이어와 맥스풀링을 진행하는 맥스풀링층과 각각의 커널에 대한 결과들을 하나로 연결하는 Concatenate 레이어, 그리고 드롭아웃(비율 0.8)을 진행하는 드롭아웃 레이어를 만들었다.
+   ```python
+   conv_blocks = []
+
+      for sz in [3, 4, 5]:
+          conv = Conv1D(filters = num_filters,
+                               kernel_size = sz,
+                               padding = "valid",
+                               activation = "relu",
+                               strides = 1)(z)
+          conv = GlobalMaxPooling1D()(conv)
+          conv_blocks.append(conv)
+
+      z = Concatenate()(conv_blocks) if len(conv_blocks) > 1 else conv_blocks[0]
+      z = Dropout(dropout_ratio[1])(z)
+   ```
+
+
+   Fully Connected(완전연결) 레이어를 추가하고, 최종적으로 활성화 함수로 sigmoid를 사용해 1과 0(긍정과 부정)을       반환하는 노드 1개의 레이어 위치시시키고 모델을 컴파일한다.
+      ```python
+      z = Dense(hidden_units, activation="relu")(z)
+      model_output = Dense(1, activation="sigmoid")(z)
+      model = Model(model_input, model_output)
+      model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["acc"])
+      ```
+      
+     이걸로 CNN 모델의 설계가 끝이났다.
+     
+3) **모델 학습과 평가**
+   이제 모델을 학습하고 테스트 데이터를 통해 모델의 성능을 평가할 차례다.
+   
+   ```python
+   es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=4)
+   mc = ModelCheckpoint('CNN_model.h5', monitor='val_acc', mode='max', verbose=1, save_best_only=True)
+   ```
+   모델 학습을 진행하기 전에, 조기 종료와 체크포인트를 통한 모델 성는이 뛰어난 모델을 저장해야한다.
+
+   조기 종료는 모델 학습이 진행되는 동안 val_loss가 일정 epoch가 지나도 개선(loss가 줄어드는 것)되지 않으면 모델이 과적합 되어간다고 판단하여 미리 학습이 종료되는 것을 이야기한다.
+
+       
+   모델이 임의의 데이터들에 대해 모두 균일한 성능을 보여주는 것이 아닌, 오로지 train_data에 한하여 좋은 성능을 보여주는 것을 과적합이라한다.   
+   이러한 경우, 검증을 위해 val_loss를 모니터링 해가며 모델이 과적합 되기 이전에 학습을 종료한다.  
+   추가적으로 조기 종료는 모델의 성능이 개선되지 않을 때 무의미한 학습 과정을 정지하여 자원과 시간을 절약하는데도 도움이 된다.
+
+     아래의 코드는 val_loss가 4epoch 동안 개선되지 않으면 모델 학습을 조기종료하는 코드이다.
+    ```python
+   es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=4)
+   ```
+
+      
+   추가로 학습이 종료되기 전까지 가장 성능이 좋았던(val_acc가 가장 큰) 모델을 추후에 사용하기 위해 모델의 가중치를 저장하는 것이 체크포인트를 통한 모델 저장이다.
+
+    val_acc가 가장 큰 모델을 체크포인트로 저장한다.
+   ```python
+   es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=4)
+   mc = ModelCheckpoint('CNN_model.h5', monitor='val_acc', mode='max', verbose=1, save_best_only=True)
+   ```
+
+   모델 학습이 끝났으니, 체크포인트를 통해 저장한 모델을 로드하여 테스트 데이터에 대해 평가한다.
+   ```python
+   loaded_model = load_model('CNN_model.h5')
+   print("\n 테스트 정확도: %.4f" % (loaded_model.evaluate(X_test, y_test)[1]))
+   ```
+   ```python
+   테스트 정확도: 0.8430
+   ```
+
+   테스트 데이터에 대해 84퍼센트의 정확도를 보이는 모델이 완성되었다.  
+   
+
+5) **리뷰 예측**  
+   lstm 모델에서와 동일하게 sentiment_predict 예측 함수를 이용해 리뷰를 예측한다.
+   ```python
+   sentiment_predict('이 영화 개꿀잼 ㅋㅋㅋ')
+   ```
+   ```python
+   93.73% 확률로 긍정 리뷰입니다.
+   ```
+    ```python
+   sentiment_predict('와 개쩐다 정말 세계관 최강자들의 영화다')
+   ```
+   ```python
+   85.93% 확률로 긍정 리뷰입니다.
+   ```
+
+   
 ## LSTM과 CNN의 성능 비교
 
