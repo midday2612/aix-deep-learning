@@ -494,24 +494,24 @@ ________________________________________________________________________________
      ModelCheckpoint : 검증 데이터의 정확도(val_acc)가 이전보다 좋아질 경우에만 모델을 저장  
      validation_split=0.2 : 훈련 데이터의 20%를 검증 데이터로 분리해서 사용하고, 검증 데이터를 통해서 훈련이 적절히 되고 있는지 확인. 검증 데이터는 기계가 훈련 데이터에 과적합되고 있지는 않은지 확인하기 위한 용도로 사용.
      ```python
-    from tensorflow.keras.layers import Embedding, Dense, LSTM
-    from tensorflow.keras.models import Sequential
-    from tensorflow.keras.models import load_model
-    from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+     from tensorflow.keras.layers import Embedding, Dense, LSTM
+     from tensorflow.keras.models import Sequential
+     from tensorflow.keras.models import load_model
+     from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
-    embedding_dim = 100
-    hidden_units = 128
+     embedding_dim = 100
+     hidden_units = 128
 
-    model = Sequential()
-    model.add(Embedding(vocab_size, embedding_dim))
-    model.add(LSTM(hidden_units))
-    model.add(Dense(1, activation='sigmoid'))
+     model = Sequential()
+     model.add(Embedding(vocab_size, embedding_dim))
+     model.add(LSTM(hidden_units))
+     model.add(Dense(1, activation='sigmoid'))
 
-    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=4)
-    mc = ModelCheckpoint('best_model.h5', monitor='val_acc', mode='max', verbose=1, save_best_only=True)
+     es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=4)
+     mc = ModelCheckpoint('best_model.h5', monitor='val_acc', mode='max', verbose=1, save_best_only=True)
 
-    model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['acc'])
-    history = model.fit(X_train, y_train, epochs=15, callbacks=[es, mc], batch_size=64, validation_split=0.2)
+     model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['acc'])
+     history = model.fit(X_train, y_train, epochs=15, callbacks=[es, mc], batch_size=64, validation_split=0.2)
     ```
 
 _________________________________________________________________________________________
