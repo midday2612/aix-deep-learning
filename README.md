@@ -486,13 +486,33 @@ ________________________________________________________________________________
    LSTM은 체인 구조를 가지고 있지만, 4개의 Layer가 특별한 방식으로 서로 정보를 주고 받도록 되어 있다.
 
 3) **LSTM으로 네이버 영화 리뷰 감성 분류하기**
-   - LSTM 모델 설명
+   - LSTM 모델 설명  
      하이퍼파라미터인 임베딩 벡터의 차원은 100, 은닉 상태의 크기는 128이다. 모델은 다 대 일 구조의 LSTM을 사용한다. 해당 모델은 마지막 시점에서 두 개의 선택지 중 하나를 예측하는 이진 분류 문제를 수행하는 모델이다.
      이진 분류 문제의 경우, 출력층에 로지스틱 회귀를 사용해야 하므로 활성화 함수로는 시그모이드 함수를 사용하고, 손실 함수로는 크로스 엔트로피 함수를 사용한다. 하이퍼파라미터인 배치 크기는 64이며, 15에포크를 수행한다.
-   - 코드 설명
-     EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=4) : 검증 데이터 손실(val_loss)이 증가하면, 과적합 징후므로 검증 데이터 손실이 4회 증가하면 정해진 에포크가 도달하지 못하였더라도 학습을 조기 종료(Early Stopping)한다
-     ModelCheckpoint : 검증 데이터의 정확도(val_acc)가 이전보다 좋아질 경우에만 모델을 저장
-     
+   - 코드 설명  
+     EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=4) : 검증 데이터 손실(val_loss)이 증가하면, 과적합 징후므로 검증 데이터 손실이 4회 증가하면 정해진 에포크가 도달하지 못하였더라도 학습을 조기 종료(Early Stopping)한다  
+     ModelCheckpoint : 검증 데이터의 정확도(val_acc)가 이전보다 좋아질 경우에만 모델을 저장  
+     validation_split=0.2 : 훈련 데이터의 20%를 검증 데이터로 분리해서 사용하고, 검증 데이터를 통해서 훈련이 적절히 되고 있는지 확인. 검증 데이터는 기계가 훈련 데이터에 과적합되고 있지는 않은지 확인하기 위한 용도로 사용.
+     ```python
+    from tensorflow.keras.layers import Embedding, Dense, LSTM
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.models import load_model
+    from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+
+    embedding_dim = 100
+    hidden_units = 128
+
+    model = Sequential()
+    model.add(Embedding(vocab_size, embedding_dim))
+    model.add(LSTM(hidden_units))
+    model.add(Dense(1, activation='sigmoid'))
+
+    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=4)
+    mc = ModelCheckpoint('best_model.h5', monitor='val_acc', mode='max', verbose=1, save_best_only=True)
+
+    model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['acc'])
+    history = model.fit(X_train, y_train, epochs=15, callbacks=[es, mc], batch_size=64, validation_split=0.2)
+    ```
 
 _________________________________________________________________________________________
 
