@@ -513,7 +513,15 @@ ________________________________________________________________________________
      model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['acc'])
      history = model.fit(X_train, y_train, epochs=15, callbacks=[es, mc], batch_size=64, validation_split=0.2)
     ```
-
+    코드를 진행할 시 조기 종료 조건에 따라서 9 에포크에서 훈련이 멈춘다. 훈련이 종료 될 시, 테스트 데이터에 대해서 정확도를 측정한다. 훈련과정에서 검증 데이터가 가장 높았을 때 저장된 모델인 'best_model.h5'를 로드한다.
+    ```python
+      loaded_model = load_model('best_model.h5')
+      print("\n 테스트 정확도: %.4f" % (loaded_model.evaluate(X_test, y_test)[1]))
+    ```
+   ```python
+      loaded_model = load_model('best_model.h5')
+      print("\n 테스트 정확도: %.4f" % (loaded_model.evaluate(X_test, y_test)[1]))
+   ```
 _________________________________________________________________________________________
 
 ## CNN을 이용한 예측 모델
