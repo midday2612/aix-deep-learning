@@ -485,7 +485,7 @@ ________________________________________________________________________________
 ![image](https://github.com/midday2612/aix-deep-learning/assets/149879074/8c015b35-57aa-4dd3-80e3-d8b1c1cd72e7)
    LSTM은 체인 구조를 가지고 있지만, 4개의 Layer가 특별한 방식으로 서로 정보를 주고 받도록 되어 있다.
 
-3) **LSTM으로 네이버 영화 리뷰 감성 분류하기**
+2) **LSTM으로 네이버 영화 리뷰 감성 분류하기**
    - LSTM 모델 설명  
      하이퍼파라미터인 임베딩 벡터의 차원은 100, 은닉 상태의 크기는 128이다. 모델은 다 대 일 구조의 LSTM을 사용한다. 해당 모델은 마지막 시점에서 두 개의 선택지 중 하나를 예측하는 이진 분류 문제를 수행하는 모델이다.
      이진 분류 문제의 경우, 출력층에 로지스틱 회귀를 사용해야 하므로 활성화 함수로는 시그모이드 함수를 사용하고, 손실 함수로는 크로스 엔트로피 함수를 사용한다. 하이퍼파라미터인 배치 크기는 64이며, 15에포크를 수행한다.
@@ -521,9 +521,69 @@ ________________________________________________________________________________
      print("\n 테스트 정확도: %.4f" % (loaded_model.evaluate(X_test, y_test)[1]))
      ```
      ```python
-     loaded_model = load_model('best_model.h5')
-     print("\n 테스트 정확도: %.4f" % (loaded_model.evaluate(X_test, y_test)[1]))
+     테스트 정확도: 0.8544
+     ```  
+     테스트 정확도는 85.44%이다.
+     모델과 마찬가지로 토크나이저도 다음과 같이 파일로 저장 후 다시 로드한다.
+     ```python
+     with open('tokenizer.pickle', 'wb') as handle:
+     pickle.dump(tokenizer, handle)
+
+     with open('tokenizer.pickle', 'rb') as handle:
+     tokenizer = pickle.load(handle)
      ```
+     
+   3) **리뷰 예측하기**
+      임의의 리뷰에 대해서 예측하는 함수를 만들어보자. model.predict()를 사용하여 현재 학습한 model에 새로운 입력에 대해서 예측값을 얻는다. 이때 model.fit()을 할 때와 마찬가지로 새로운 입력에 대해서도 동일한 전처리를 수행 후에 model.predict()의 입력으로 사용해야 한다.
+      ```python
+      def sentiment_predict(new_sentence):
+      new_sentence = re.sub(r'[^ㄱ-ㅎㅏ-ㅣ가-힣 ]','', new_sentence)
+      new_sentence = okt.morphs(new_sentence, stem=True) # 토큰화
+      new_sentence = [word for word in new_sentence if not word in stopwords] # 불용어 제거
+      encoded = tokenizer.texts_to_sequences([new_sentence]) # 정수 인코딩
+      pad_new = pad_sequences(encoded, maxlen = max_len) # 패딩
+      score = float(loaded_model.predict(pad_new)) # 예측
+      if(score > 0.5):
+            print("{:.2f}% 확률로 긍정 리뷰입니다.\n".format(score * 100))
+      else:
+            print("{:.2f}% 확률로 부정 리뷰입니다.\n".format((1 - score) * 100))
+      ```
+      ```python
+      sentiment_predict('이 영화 개꿀잼 ㅋㅋㅋ')
+      ```
+      ```python
+      97.76% 확률로 긍정 리뷰입니다.
+      ```
+      ```python
+      sentiment_predict('이 영화 개꿀잼 ㅋㅋㅋ')
+      ```
+      ```python
+      sentiment_predict('이 영화 핵노잼 ㅠㅠ')
+      ```
+      ```python
+      98.55% 확률로 부정 리뷰입니다.
+      ```
+      ```python
+      sentiment_predict('이딴게 영화냐 ㅉㅉ')
+      ```
+      ```python
+      sentiment_predict('이 영화 핵노잼 ㅠㅠ')
+      ```
+      ```python
+      99.91% 확률로 부정 리뷰입니다.
+      ```
+      ```python
+      sentiment_predict('감독 뭐하는 놈이냐?')
+      ```
+      ```python
+      98.21% 확률로 부정 리뷰입니다.
+      ```
+      ```python
+      sentiment_predict('와 개쩐다 정말 세계관 최강자들의 영화다')
+      ```
+      ```python
+      80.77% 확률로 긍정 리뷰입니다.
+      ```
 _________________________________________________________________________________________
 
 ## CNN을 이용한 예측 모델
