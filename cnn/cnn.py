@@ -9,6 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import re
 import urllib.request
+import time 
+
 from konlpy.tag import Okt
 from tqdm import tqdm
 from tensorflow.keras.preprocessing.text import Tokenizer
@@ -18,6 +20,8 @@ from tensorflow.keras.models import Sequential, Model
 from tensorflow.keras.layers import Embedding, Dropout, Conv1D, GlobalMaxPooling1D, Dense, Input, Flatten, Concatenate
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.models import load_model
+
+start = time.time()
 
 # Load X_train from the text file
 X_train = np.loadtxt('../data_prep/prep_X_train.txt', delimiter=' ', dtype=int)
@@ -98,3 +102,5 @@ def sentiment_predict(new_sentence):
 sentiment_predict('이 영화 개꿀잼 ㅋㅋㅋ')
 sentiment_predict('이 영화 핵노잼 ㅠㅠ')
 sentiment_predict('이딴게 영화냐 ㅉㅉ')
+
+print(f"{time.time()-start:.4f} sec")

@@ -9,11 +9,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import re
 import urllib.request
+import time
+
 from konlpy.tag import Okt
 from tqdm import tqdm
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
+start = time.time()
 
 # Load X_train from the text file
 X_train = np.loadtxt('../data_prep/prep_X_train.txt', delimiter=' ', dtype=int)
@@ -55,7 +58,7 @@ es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=4)
 mc = ModelCheckpoint('best_model.h5', monitor='val_acc', mode='max', verbose=1, save_best_only=True)
 
 model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['acc'])
-history = model.fit(X_train, y_train, epochs=15, callbacks=[es, mc], batch_size=64, validation_split=0.2)
+history = model.fit(X_train, y_train, epochs=10, callbacks=[es, mc], batch_size=64, validation_split=0.2)
 
 loaded_model = load_model('best_model.h5')
 
@@ -78,3 +81,5 @@ def sentiment_predict(new_sentence):
 sentiment_predict('이 영화 개꿀잼 ㅋㅋㅋ')
 sentiment_predict('이 영화 핵노잼 ㅠㅠ')
 sentiment_predict('이딴게 영화냐 ㅉㅉ')
+
+print(f"{time.time()-start:.4f} sec")
