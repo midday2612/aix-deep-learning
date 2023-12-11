@@ -779,3 +779,6 @@ https://wikidocs.net/44249
 
 -cnn 감성분류
 https://wikidocs.net/85337
+
+## 블로그 소개 영상
+https://youtu.be/3nUEBSZHC2M?si=fWBBSXm4jn2cs4uy
